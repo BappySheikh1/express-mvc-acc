@@ -13,7 +13,8 @@ const viewCount = require("./middleware/viewCount");
 
 app.use(cors());
 app.use(express.json());
-
+app.use(express.static('public'))
+app.set('view engine', "ejs")
 // app.use(viewCount)
 
 
@@ -203,7 +204,13 @@ run().catch(console.dir);
 
 
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  // res.sendFile(__dirname + "/public/test.html");
+  res.render("home.ejs",{
+    id: 5,
+    user : {
+       name: "Thi is a test"
+    }
+  })
 });
 app.all("/", (req,res)=>{
   res.send('no route found')
