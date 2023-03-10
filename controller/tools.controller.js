@@ -20,7 +20,15 @@ module.exports.getToolDetail =(req,res)=>{
     const {id} =req.params
     // const filter = {_id: id}
     const foundTool = tools.find(tool => tool.id == id)
-    res.send(foundTool)
+    res.status(200).send({
+        success: true,
+        message: "Success",
+        data: foundTool
+    })
+    // res.status(500).send({
+    //     success: false,
+    //     error: "Internal server error"
+    // })
 }
 
 module.exports.updateTool =(req,res)=>{
