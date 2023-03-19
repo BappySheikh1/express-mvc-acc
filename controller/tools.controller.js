@@ -1,3 +1,4 @@
+const { getDb } = require("../utils/dbConnect.js")
 
 let tools =[
     {"id": 1, "name": "Hummer1"},
@@ -10,10 +11,21 @@ module.exports.getAllTools =(req,res,next)=>{
     res.send(tools)
 }
 
-module.exports.saveATool = (req,res)=>{
-    console.log(req.body);
-    tools.push(req.body)
-    res.send(tools)
+module.exports.saveATool =async (req,res,next)=>{
+
+   try{
+    
+    const db = getDb();
+    const tool =req.body;
+
+   const result =await db.collection("tools").insertOne(tool);
+    console.log(result);
+    res.send("Successful")
+
+   }
+   catch(error){
+      next(error)
+   }
 }
 
 module.exports.getToolDetail =(req,res)=>{

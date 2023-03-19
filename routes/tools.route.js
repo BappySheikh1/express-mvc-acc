@@ -7,7 +7,7 @@ const router = express.Router();
 
 router
 .route('/')
-/**
+/*
    * @api {get} /tools All tools
    * @apiDescription Get all the tools
    * @apiPermission admin
@@ -40,6 +40,7 @@ router
    */
 .post(toolsControllers.saveATool)
 
+// dynamic routing  
 router
 .route("/:id")
 .get(viewCount, limiter,toolsControllers.getToolDetail)

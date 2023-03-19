@@ -5,7 +5,9 @@ const app = express();
 const port = process.env.PORT || 5000;
 const dbConnect = require("./utils/dbConnect");
 const toolsRouter = require('./routes/tools.route.js');
+const userRouter =require("./routes/user.Route.js")
 const errorHandler = require("./middleware/errorHandler");
+const { connectToServer } = require("./utils/dbConnect");
 
 app.use(cors());
 app.use(express.json());
@@ -15,10 +17,19 @@ app.set('view engine', "ejs")
 
 
 
-dbConnect()
+// dbConnect()
+connectToServer( (err)=>{
+    if(!err){
+      app.listen(port, () => {
+        console.log(`Example app listening on port ${port}`);
+      });
+    }else{
+      console.log(err);
+    } 
+});
 
 app.use('/api/v1/tools', toolsRouter)
-app.use('/api/v1/user',)
+// app.use('/api/v1/user', userRouter)
 
 app.get("/", (req, res) => {
   // res.sendFile(__dirname + "/public/test.html");
@@ -35,9 +46,10 @@ app.all("/", (req,res)=>{
 
 app.use(errorHandler)
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Example app listening on port ${port}`);
+// });
+
 
 // Database or server related issue hole app ta ke close kore deoya project er shes e rakhte hoy  
 process.on("unhandledRejection",(error)=>{
