@@ -1,3 +1,4 @@
-module.exports.getAllUsers=(req,res,next)=>{
-    res.send("user route here")
+
+module.exports.getAllUsers=(req,res)=>{
+    res.send('All User here')
 }

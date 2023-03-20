@@ -1,4 +1,5 @@
-const { getDb } = require("../utils/dbConnect.js")
+const { ObjectId } = require("mongodb");
+const { getDb } = require("../utils/dbConnect")
 
 let tools =[
     {"id": 1, "name": "Hummer1"},
@@ -7,57 +8,104 @@ let tools =[
     {"id": 4, "name": "Hummer4"},
     {"id": 5, "name": "Hummer5"},
 ]
-module.exports.getAllTools =(req,res,next)=>{
-    res.send(tools)
+module.exports.getAllTools =async (req,res,next)=>{
+    try {
+        // pagination dynamic
+        const {limit, page} =req.query;
+        const db = getDb();
+        // cursor => toArray(), forEach()
+       const tool =await db
+       .collection("tools")
+       .find()
+       .project({_id:0})
+       .skip(+page * limit)
+       .limit(+limit)
+       .toArray();
+       res.status(200).json({success:true, data: tool})
+
+    } catch (error) {
+        next(error)
+    }
 }
 
 module.exports.saveATool =async (req,res,next)=>{
+ try {
+    const db =getDb();
+    const tool =req.body
+    const result =await db.collection("tools").insertOne(tool) 
+    // console.log(result);
+    if(!result.insertedId){
+        return res.status(400).send({status: false, error: "Something went wrong"})
+    }
+    res.send({ success: true, message: `Tool added with id: ${result.insertedId}`});
 
-   try{
+ } catch (error) {
+    next(error)
+ }
+}
+
+module.exports.getToolDetail =async (req,res,next)=>{
+  try {
+    const db= getDb()
+    const { id }=req.params;
     
-    const db = getDb();
-    const tool =req.body;
+    if(!ObjectId.isValid(id)){
+        return res.status(400).json({success: false, error: "Not a valid tool id."});
+    }
 
-   const result =await db.collection("tools").insertOne(tool);
-    console.log(result);
-    res.send("Successful")
+    const tool =await db.collection("tools").findOne({_id: ObjectId(id)})
 
-   }
-   catch(error){
-      next(error)
-   }
+    if(!tool){
+        return res.status(400).json({success: false, error:"Couldn't find a tool with this id"})
+    }
+
+    res.status(200).json({ success: true, data: tool})
+
+  } catch (error) {
+    next(error)
+  }
 }
 
-module.exports.getToolDetail =(req,res)=>{
-    const {id} =req.params
-    // const filter = {_id: id}
-    const foundTool = tools.find(tool => tool.id == id)
-    res.status(200).send({
-        success: true,
-        message: "Success",
-        data: foundTool
-    })
-    // res.status(500).send({
-    //     success: false,
-    //     error: "Internal server error"
-    // })
+module.exports.updateTool =async (req,res,next)=>{
+    try {
+        const db= getDb()
+        const { id }=req.params;
+        
+        if(!ObjectId.isValid(id)){
+            return res.status(400).json({success: false, error: "Not a valid tool id."});
+        }
+    
+        const tool =await db.collection("tools").updateOne({_id: ObjectId(id)}, {$set:req.body});
+    
+        if(!tool.modifiedCount){
+            return res.status(400).json({success: false, error:"Couldn't update the tool"})
+        }
+    
+        res.status(200).json({ success: true, message: "SuccessFully updated the tool"})
+    
+      } catch (error) {
+        next(error)
+      }
 }
 
-module.exports.updateTool =(req,res)=>{
-//   const newData= req.body;
-  const {id} =req.params
-  const filter = { _id: id };
-  
-   const newData = tools.find(tool => tool.id === Number(id))
-   newData.id = id;
-   newData.name = req.body.name;
-   res.send(newData);
-}
-
-module.exports.deleteTool=(req,res)=>{
-    const {id} =req.params
-    const filter = {_id: id}
-
-    tools = tools.filter(tool => tool.id !== Number(id))
-    res.send(tools)
+module.exports.deleteTool=async (req,res,next)=>{
+    try {
+        const db= getDb()
+        const { id }=req.params;
+        
+        if(!ObjectId.isValid(id)){
+            return res.status(400).json({success: false, error: "Not a valid tool id."});
+        }
+    
+        const tool =await db.collection("tools").deleteOne({_id: ObjectId(id)});
+    
+        if(!tool.deletedCount){
+            return res.status(400).json({success: false, error:"Couldn't delete the tool"})
+        }
+    
+        res.status(200).json({ success: true, message:"SuccessFully deleted the tool"})
+    
+      } catch (error) {
+        next(error)
+      }
 }
